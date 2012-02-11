@@ -8,6 +8,7 @@ class Lisp
       :quote => lambda { |sexpr, _| sexpr[0] },
       :car   => lambda { |(list), _| list[0] },
       :cdr   => lambda { |(list), _| list.drop 1 },
+      :+     => lambda { |(list), _| list.inject(:+) },
       :cons  => lambda { |(e,cell), _| [e] + cell },
       :eq    => lambda { |(l,r), _| l == r },
       :if    => lambda { |(cond, thn, els), ctx| eval(cond, ctx) ? eval(thn, ctx) : eval(els, ctx) },
