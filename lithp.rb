@@ -10,8 +10,14 @@ class Lisp
       :quote => lambda { |sexpr, _| sexpr[0] },
       :car   => lambda { |(list), _| list[0] },
       :cdr   => lambda { |(list), _| list.drop 1 },
+      :"+"   => lambda { |list, _| list.inject(:"+") },
+      :"-"   => lambda { |list, _| list.inject(:"-") },
+      :"*"   => lambda { |list, _| list.inject(:"*") },
+      :"/"   => lambda { |list, _| list.inject(:"/") },
       :cons  => lambda { |(e,cell), _| [e] + cell },
       :eq    => lambda { |(l,r), _| l == r },
+      # do any menbers of list respond true to blank?
+      :blank => lambda { |(list), ctx| Array[list].map { |item| eval(item, ctx).blank? }.include?(true) },
       :if    => lambda { |(cond, thn, els), ctx|
         # is cond unblank?
         if eval(cond, ctx).unblank?
