@@ -3,7 +3,8 @@
 
 class SExpressionParser
   def initialize(expression)
-    @tokens = expression.scan /[()]|\w+|".*?"|'.*?'/
+    function_names = '[\w\+\-\*\/]+'
+    @tokens = expression.scan /[()]|#{function_names}|".*?"|'.*?'/
   end
 
   def peek
@@ -17,12 +18,16 @@ class SExpressionParser
   def parse
     if (token = next_token) == '('
       parse_list
-    elsif token =~ /['"].*/
+    elsif token =~ /['"].+/
       token[1..-2]
     elsif token =~ /\d+/
       token.to_i
     else
-      token.to_sym
+      if token.respond_to?(:to_sym)
+        token.to_sym
+      else
+        nil
+      end
     end
   end
 
