@@ -1,6 +1,8 @@
 # by Fogus
 # http://joyofclojure.com
 
+require 'helper'
+
 class Lisp
   def initialize
     @env = { 
@@ -8,11 +10,24 @@ class Lisp
       :quote => lambda { |sexpr, _| sexpr[0] },
       :car   => lambda { |(list), _| list[0] },
       :cdr   => lambda { |(list), _| list.drop 1 },
-      :+     => lambda { |(list), _| list.inject(:+) },
       :cons  => lambda { |(e,cell), _| [e] + cell },
       :eq    => lambda { |(l,r), _| l == r },
-      :if    => lambda { |(cond, thn, els), ctx| eval(cond, ctx) ? eval(thn, ctx) : eval(els, ctx) },
-      :atom  => lambda { |(sexpr), _| (sexpr.is_a? Symbol) or (sexpr.is_a? Numeric) }
+      :if    => lambda { |(cond, thn, els), ctx|
+        # is cond unblank?
+        if eval(cond, ctx).unblank?
+          # does the thn clause exist? then evalute thn.
+          thn ? eval(thn, ctx) : true
+          # return true if thn doesn't exist
+          # example: (if (eq 1 1)) evaluates to true
+        else
+          # does the els clause exist? then evalute els.
+          els ? eval(els, ctx) : false
+          # return true if els doesn't exist
+          # example: (if (eq 1 2)) evaluates to false
+        end
+      },
+      :atom  => lambda { |(sexpr), _| (sexpr.is_a? Symbol) or (sexpr.is_a? Numeric) },
+      :env   => lambda { |_, __| @env.keys }
     }
   end
 
@@ -22,6 +37,8 @@ class Lisp
   end
 
   def eval sexpr, ctx=@env
+    return if sexpr.blank?
+
     if @env[:atom].call [sexpr], ctx
       return ctx[sexpr] if ctx[sexpr]
       return sexpr
