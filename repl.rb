@@ -13,8 +13,12 @@ loop do
   begin
     s_expression = SExpressionParser.new(line).parse
     p lisp.eval(s_expression)
-  rescue Exception => error
+  rescue => error
     # ANSI escaped red
-    puts "\e[31m#{error}\e[0m"
+    print "\e[31m"
+    puts "on #{error.backtrace.pop}: #{error.message}"
+    puts error.backtrace.map { |line| "\tfrom:#{line} " }
+    # Clear ANSI escapes
+    print "\e[0m"
   end
 end
